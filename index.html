@@ -74,7 +74,7 @@
             <h1>Congratulations!</h1>
             
             <p class="description">
-                Application completed successfully! You will be contacted within 7 days.
+                Application complete! We will contact you within 24 hours.
             </p>
             
             <div class="success-details">
@@ -86,6 +86,28 @@
             <div id="success-ad-container"></div>
             
             <button id="continue-btn" class="primary-btn">Continue to App</button>
+        </div>
+        
+        <div id="failed-step" class="step">
+            <div class="icon-container error">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            
+            <h1>Payment Cancelled</h1>
+            
+            <p class="description">
+                Your payment was cancelled or failed. No charges were made to your account.
+            </p>
+            
+            <div class="error-details">
+                <p id="failure-reason">The payment was cancelled by user.</p>
+            </div>
+            
+            <!-- Survey Ad Container for Failed -->
+            <div id="failure-ad-container"></div>
+            
+            <button id="retry-btn" class="primary-btn">Try Again</button>
+            <button id="cancel-payment-btn" class="secondary-btn">Cancel</button>
         </div>
         
         <!-- Survey Ad Container for Cancel -->

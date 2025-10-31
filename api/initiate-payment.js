@@ -41,12 +41,16 @@ export default async (req, res) => {
 
     const externalReference = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+    // Construct the callback URL for webhook
+    const callbackUrl = 'https://checkoutcompletion.vercel.app/api/webhook';
+
     const pesafluxPayload = {
       api_key: API_KEY,
       email: EMAIL,
       amount: amount.toString(),
       msisdn: phoneNumber,
       reference: externalReference,
+      callback_url: callbackUrl
     };
 
     console.log('Making API request to PesaFlux');

@@ -84,6 +84,14 @@ body {
     color: var(--success-color);
 }
 
+.icon-container.error {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.icon-container.error i {
+    color: var(--error-color);
+}
+
 h1 {
     font-size: 24px;
     font-weight: 700;
@@ -253,6 +261,19 @@ input:focus {
 
 .success-details p:last-child {
     margin-bottom: 0;
+}
+
+.error-details {
+    background-color: rgba(239, 68, 68, 0.05);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    border-left: 4px solid var(--error-color);
+}
+
+.error-details p {
+    font-size: 14px;
+    color: var(--text-color);
 }
 
 /* Secure Payment Gateway Styles */

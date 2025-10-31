@@ -3,17 +3,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const infoStep = document.getElementById('info-step');
     const paymentStep = document.getElementById('payment-step');
     const successStep = document.getElementById('success-step');
+    const failedStep = document.getElementById('failed-step');
     
     const activateBtn = document.getElementById('activate-btn');
     const cancelBtn = document.getElementById('cancel-btn');
     const payBtn = document.getElementById('pay-btn');
     const backBtn = document.getElementById('back-btn');
     const continueBtn = document.getElementById('continue-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
     
     const phoneInput = document.getElementById('phone-input');
     const errorMessage = document.getElementById('error-message');
     const statusContainer = document.getElementById('status-container');
     const transactionIdElement = document.getElementById('transaction-id');
+    const failureReasonElement = document.getElementById('failure-reason');
     
     // Variables
     const ACTIVATION_FEE = 10;
@@ -85,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
         infoStep.classList.remove('active');
         paymentStep.classList.remove('active');
         successStep.classList.remove('active');
+        failedStep.classList.remove('active');
         
         step.classList.add('active');
     }
@@ -199,21 +204,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Stop polling
                         clearInterval(pollInterval);
                         
-                        // Show error
-                        showStatus('Payment failed. Please try again.', 'error');
-                        
-                        // Show survey ad on failed payment (before Try Again button)
+                        // Show failure step
                         setTimeout(() => {
-                            surveyAdManager.showInlineAd('failed-payment-ad-container', 3);
+                            // Update failure reason if available
+                            if (data.payment.resultDescription) {
+                                failureReasonElement.textContent = data.payment.resultDescription;
+                            } else {
+                                failureReasonElement.textContent = 'The payment was cancelled by user.';
+                            }
+                            
+                            showStep(failedStep);
+                            
+                            // Show survey ad on failed payment
+                            setTimeout(() => {
+                                surveyAdManager.showInlineAd('failure-ad-container', 3);
+                            }, 500);
+                            
+                            // Show popup ad
+                            surveyAdManager.showPopupAd(3000, 2);
                         }, 1000);
-                        
-                        // Show popup ad
-                        surveyAdManager.showPopupAd(3000, 2);
-                        
-                        // Re-enable buttons
-                        payBtn.disabled = false;
-                        payBtn.textContent = 'Try Again';
-                        backBtn.disabled = false;
                     }
                 }
             } catch (error) {
@@ -258,6 +267,33 @@ document.addEventListener('DOMContentLoaded', function() {
         // Redirect back to app if return URL is provided
         if (returnUrl) {
             window.location.href = returnUrl + '?status=success&reference=' + paymentReference;
+        }
+    });
+    
+    retryBtn.addEventListener('click', function() {
+        // Go back to payment step to retry
+        showStep(paymentStep);
+        // Reset button states
+        payBtn.disabled = false;
+        payBtn.textContent = 'Proceed to Pay';
+        backBtn.disabled = false;
+        hideStatus();
+    });
+    
+    cancelPaymentBtn.addEventListener('click', function() {
+        // Show survey ad when user cancels
+        const cancelContainer = document.getElementById('cancel-ad-container');
+        cancelContainer.classList.remove('hidden');
+        surveyAdManager.showInlineAd('cancel-ad-container', 2);
+        
+        // Show popup ad immediately
+        surveyAdManager.showPopupAd(0, 3);
+        
+        // Redirect back to app if return URL is provided
+        if (returnUrl) {
+            setTimeout(() => {
+                window.location.href = returnUrl + '?status=cancelled';
+            }, 10000);
         }
     });
     
