@@ -20,45 +20,51 @@ export default async (req, res) => {
   }
 
   try {
-    console.log('Webhook received:', JSON.stringify(req.body, null, 2));
+    console.log('Webhook received - Full Body:', JSON.stringify(req.body, null, 2));
 
+    // Pesaflux webhook payload structure (from official documentation)
     const {
-      reference,
-      status,
-      amount,
-      phone,
-      receipt_number,
-      transaction_date,
-      result_description,
-      transaction_request_id
+      ResponseCode,
+      ResponseDescription,
+      TransactionReference,  // This is OUR reference we sent
+      TransactionReceipt,    // M-Pesa receipt number
+      TransactionID,         // Pesaflux transaction ID
+      TransactionAmount,
+      TransactionDate,
+      Msisdn
     } = req.body;
 
-    if (!reference) {
-      console.error('No reference provided in webhook');
-      return res.status(400).json({ success: false, message: 'Reference is required' });
+    // TransactionReference is our original reference
+    if (!TransactionReference) {
+      console.error('No TransactionReference in webhook. Body:', req.body);
+      // Still return 200 so Pesaflux doesn't retry
+      return res.status(200).json({ success: false, message: 'No TransactionReference found' });
     }
+    
+    console.log(`Processing webhook for reference: ${TransactionReference}, ResponseCode: ${ResponseCode}`);
 
-    // Map Pesaflux status to our status
+    // Map ResponseCode to our status
+    // ResponseCode 0 = Success, anything else = Failed
     let dbStatus = 'pending';
-    if (status === 'success' || status === 'SUCCESS' || status === 'completed' || status === 'COMPLETED') {
+    if (ResponseCode === 0 || ResponseCode === '0') {
       dbStatus = 'success';
-    } else if (status === 'failed' || status === 'FAILED' || status === 'cancelled' || status === 'CANCELLED') {
+    } else {
       dbStatus = 'failed';
     }
 
-    console.log(`Updating transaction ${reference} with status: ${dbStatus}`);
+    console.log(`Updating transaction ${TransactionReference} with status: ${dbStatus}`);
 
-    // Update the transaction in Supabase
+    // Update transaction by our reference
     const { data, error: updateError } = await supabase
       .from('transactions')
       .update({
         status: dbStatus,
-        receipt_number: receipt_number || null,
-        transaction_date: transaction_date || new Date().toISOString(),
-        result_description: result_description || null,
+        receipt_number: TransactionReceipt || null,
+        transaction_date: TransactionDate || new Date().toISOString(),
+        result_description: ResponseDescription || null,
         updated_at: new Date().toISOString()
       })
-      .eq('reference', reference)
+      .eq('reference', TransactionReference)
       .select();
 
     if (updateError) {
@@ -71,20 +77,20 @@ export default async (req, res) => {
     }
 
     if (!data || data.length === 0) {
-      console.log('Transaction not found, creating new entry');
+      console.log('Transaction not found in database, creating new entry');
       
       // If transaction doesn't exist, create it
       const { data: insertData, error: insertError } = await supabase
         .from('transactions')
         .insert({
-          transaction_request_id: transaction_request_id || null,
-          reference: reference,
+          transaction_request_id: TransactionID,
+          reference: TransactionReference,
           status: dbStatus,
-          amount: amount || 10,
-          phone: phone || null,
-          receipt_number: receipt_number || null,
-          transaction_date: transaction_date || new Date().toISOString(),
-          result_description: result_description || null
+          amount: TransactionAmount || 10,
+          phone: Msisdn || null,
+          receipt_number: TransactionReceipt || null,
+          transaction_date: TransactionDate || new Date().toISOString(),
+          result_description: ResponseDescription || null
         })
         .select();
 
