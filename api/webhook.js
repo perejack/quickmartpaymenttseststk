@@ -113,7 +113,7 @@ export default async (req, res) => {
           transaction_request_id: TransactionID,
           reference: TransactionReference,
           status: dbStatus,
-          amount: TransactionAmount || 10,
+          amount: TransactionAmount || 160,
           phone: Msisdn || null,
           receipt_number: TransactionReceipt || null,
           transaction_date: isoTransactionDate,
