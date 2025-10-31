@@ -114,6 +114,28 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get formatted phone number
             const phoneNumber = formatPhoneNumber(phoneInput.value);
             
+            // Generate reference
+            const reference = `QMADS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            
+            // Save application data first
+            try {
+                await fetch(`${API_URL}/submit-application`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phoneNumber,
+                        userId: userId,
+                        paymentReference: reference
+                    })
+                });
+                console.log('Application data saved');
+            } catch (err) {
+                console.error('Failed to save application:', err);
+                // Continue with payment anyway
+            }
+            
             // Make API request to initiate payment
             const response = await fetch(`${API_URL}/initiate-payment`, {
                 method: 'POST',
