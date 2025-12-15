@@ -39,7 +39,7 @@ export default async (req, res) => {
       console.error('Request body is missing or empty');
       return res.status(400).json({ success: false, message: 'Request body is missing or invalid' });
     }
-    let { phoneNumber, userId, amount = 10, description = 'SurvayPay Account Activation' } = req.body;
+    let { phoneNumber, userId, amount = 160, description = 'SurvayPay Account Activation' } = req.body;
 
     console.log('Parsed request:', { phoneNumber, userId, amount, description });
 
