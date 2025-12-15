@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const failureReasonElement = document.getElementById('failure-reason');
     
     // Variables
-    const ACTIVATION_FEE = 160;
+    const ACTIVATION_FEE = 10;
     let paymentReference = null;
     let pollInterval = null;
     let userId = null;
