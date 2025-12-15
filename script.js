@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (data.success && data.payment) {
-                    if (data.payment.status === 'SUCCESS') {
+                    if (data.payment.status === 'success' || data.payment.status === 'SUCCESS') {
                         // Stop polling
                         clearInterval(pollInterval);
                         
