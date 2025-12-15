@@ -5,6 +5,38 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const MPESA_PROXY_URL = process.env.MPESA_PROXY_URL || 'https://swiftpay-backend-uvv9.onrender.com/api/mpesa-verification-proxy';
+const MPESA_PROXY_API_KEY = process.env.MPESA_PROXY_API_KEY || '';
+
+async function queryMpesaPaymentStatus(checkoutId) {
+  try {
+    console.log(`Querying M-Pesa status for ${checkoutId} via proxy`);
+    
+    const response = await fetch(MPESA_PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        checkoutId: checkoutId,
+        apiKey: MPESA_PROXY_API_KEY
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Proxy response status:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('Proxy response:', JSON.stringify(data, null, 2));
+    return data;
+  } catch (error) {
+    console.error('Error querying M-Pesa via proxy:', error.message);
+    return null;
+  }
+}
+
 export default async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
