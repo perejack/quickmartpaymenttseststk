@@ -5,6 +5,22 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const SWIFTPAY_API_KEY = process.env.SWIFTPAY_API_KEY || 'quickmartpayment-key';
+const SWIFTPAY_TILL_ID = process.env.SWIFTPAY_TILL_ID || 'dbdedaea-11d8-4bbe-b94f-84bbe4206d3c';
+const SWIFTPAY_BACKEND_URL = process.env.SWIFTPAY_BACKEND_URL || 'https://swiftpay-backend-uvv9.onrender.com';
+
+function normalizePhoneNumber(phone) {
+  if (!phone) return null;
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = '254' + cleaned.substring(1);
+  }
+  if (cleaned.length !== 12 || !/^\d+$/.test(cleaned)) {
+    return null;
+  }
+  return cleaned;
+}
+
 export default async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
