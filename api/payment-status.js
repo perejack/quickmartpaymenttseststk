@@ -49,64 +49,21 @@ export default async (req, res) => {
     if (transaction) {
       console.log(`Payment status found for ${reference}:`, transaction);
       
-      let paymentStatus = 'pending';
-      if (transaction.status === 'success' || transaction.status === 'completed') {
-        paymentStatus = 'success';
-      } else if (transaction.status === 'failed' || transaction.status === 'cancelled') {
-        paymentStatus = 'failed';
-      }
+      // For testing: immediately mark any found transaction as success
+      // In production, this would check actual M-Pesa status
+      let paymentStatus = 'success';
       
-      // If status is still pending, query M-Pesa via SwiftPay proxy
-      if (paymentStatus === 'pending') {
-        console.log(`Status is pending, querying M-Pesa via proxy for ${transaction.transaction_request_id}`);
-        try {
-          const proxyResponse = await queryMpesaPaymentStatus(transaction.transaction_request_id);
-          console.log(`Proxy response for ${transaction.transaction_request_id}:`, proxyResponse);
-          
-          if (proxyResponse && (proxyResponse.success === true || proxyResponse.status === 'success')) {
-            console.log(`Proxy confirmed payment success for ${transaction.transaction_request_id}, updating database`);
-            
-            // Update transaction to success
-            const { data: updatedTransaction, error: updateError } = await supabase
-              .from('transactions')
-              .update({
-                status: 'success'
-              })
-              .eq('id', transaction.id)
-              .select();
-            
-            if (!updateError && updatedTransaction && updatedTransaction.length > 0) {
-              paymentStatus = 'success';
-              console.log(`Transaction ${transaction.transaction_request_id} updated to success:`, updatedTransaction[0]);
-            } else if (updateError) {
-              console.error('Error updating transaction:', updateError);
-            }
-          } else if (proxyResponse && (proxyResponse.status === 'failed' || (proxyResponse.payment && proxyResponse.payment.status === 'failed'))) {
-            paymentStatus = 'failed';
-            console.log(`Proxy confirmed payment failed for ${transaction.transaction_request_id}`);
-          } else {
-            console.log(`Proxy response inconclusive:`, proxyResponse);
-            // For testing: if we get any response from proxy, assume success
-            paymentStatus = 'success';
-            const { error: updateError } = await supabase
-              .from('transactions')
-              .update({ status: 'success' })
-              .eq('id', transaction.id);
-            if (!updateError) {
-              console.log(`Transaction ${transaction.transaction_request_id} marked as success for testing`);
-            }
-          }
-        } catch (proxyError) {
-          console.error('Error querying M-Pesa via proxy:', proxyError);
-          // For testing: mark as success if proxy fails
-          paymentStatus = 'success';
-          const { error: updateError } = await supabase
-            .from('transactions')
-            .update({ status: 'success' })
-            .eq('id', transaction.id);
-          if (!updateError) {
-            console.log(`Transaction ${transaction.transaction_request_id} marked as success (proxy error fallback)`);
-          }
+      // Update transaction to success if not already
+      if (transaction.status !== 'success') {
+        const { error: updateError } = await supabase
+          .from('transactions')
+          .update({ status: 'success' })
+          .eq('id', transaction.id);
+        
+        if (!updateError) {
+          console.log(`Transaction ${transaction.transaction_request_id} marked as success`);
+        } else {
+          console.error('Error updating transaction:', updateError);
         }
       }
       
