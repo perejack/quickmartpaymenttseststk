@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Show popup ad after 3 seconds
                             surveyAdManager.showPopupAd(3000, 1);
                         }, 1500);
-                    } else if (data.payment.status === 'FAILED') {
+                    } else if (data.payment.status === 'failed' || data.payment.status === 'FAILED') {
                         // Stop polling
                         clearInterval(pollInterval);
                         
