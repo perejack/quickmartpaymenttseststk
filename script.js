@@ -151,15 +151,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             const data = await response.json();
+            console.log('Initiate payment response:', JSON.stringify(data));
             
-            if (data.success && data.data.externalReference) {
-                paymentReference = data.data.externalReference;
+            if (data.success && data.data) {
+                paymentReference = data.data.requestId || data.data.checkoutRequestId || data.data.transactionRequestId || data.data.externalReference;
+                console.log('Extracted payment reference:', paymentReference);
                 
-                // Show pending status
-                showStatus('STK Push sent. Please complete the payment on your phone.', 'pending');
-                
-                // Start polling for payment status
-                startPolling(paymentReference);
+                if (paymentReference) {
+                    // Show pending status
+                    showStatus('STK Push sent. Please complete the payment on your phone.', 'pending');
+                    
+                    // Start polling for payment status
+                    startPolling(paymentReference);
+                } else {
+                    console.error('No payment reference found in response');
+                    showError('Payment reference not received');
+                    showStatus('Payment initiation failed. Please try again.', 'error');
+                    payBtn.disabled = false;
+                    payBtn.textContent = 'Try Again';
+                    backBtn.disabled = false;
+                }
             } else {
                 // Show error
                 showError(data.message || 'Failed to initiate payment');
