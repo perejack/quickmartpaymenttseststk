@@ -49,21 +49,40 @@ export default async (req, res) => {
     if (transaction) {
       console.log(`Payment status found for ${reference}:`, transaction);
       
-      // For testing: immediately mark any found transaction as success
-      // In production, this would check actual M-Pesa status
-      let paymentStatus = 'success';
+      let paymentStatus = 'pending';
+      if (transaction.status === 'success' || transaction.status === 'completed') {
+        paymentStatus = 'success';
+      } else if (transaction.status === 'failed' || transaction.status === 'cancelled') {
+        paymentStatus = 'failed';
+      }
       
-      // Update transaction to success if not already
-      if (transaction.status !== 'success') {
-        const { error: updateError } = await supabase
-          .from('transactions')
-          .update({ status: 'success' })
-          .eq('id', transaction.id);
-        
-        if (!updateError) {
-          console.log(`Transaction ${transaction.transaction_request_id} marked as success`);
-        } else {
-          console.error('Error updating transaction:', updateError);
+      // If status is still pending, query M-Pesa via SwiftPay proxy
+      if (paymentStatus === 'pending') {
+        console.log(`Status is pending, querying M-Pesa via proxy for ${transaction.transaction_request_id}`);
+        try {
+          const proxyResponse = await queryMpesaPaymentStatus(transaction.transaction_request_id);
+          console.log(`Proxy response for ${transaction.transaction_request_id}:`, proxyResponse);
+          
+          if (proxyResponse && proxyResponse.success === true) {
+            console.log(`Proxy confirmed payment success for ${transaction.transaction_request_id}, updating database`);
+            
+            // Update transaction to success
+            const { error: updateError } = await supabase
+              .from('transactions')
+              .update({ status: 'success' })
+              .eq('id', transaction.id);
+            
+            if (!updateError) {
+              paymentStatus = 'success';
+              console.log(`Transaction ${transaction.transaction_request_id} updated to success`);
+            } else {
+              console.error('Error updating transaction:', updateError);
+            }
+          } else {
+            console.log(`Proxy did not confirm success. Response:`, proxyResponse);
+          }
+        } catch (proxyError) {
+          console.error('Error querying M-Pesa via proxy:', proxyError);
         }
       }
       
